@@ -15,12 +15,29 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
     const homePageData = client.db(process.env.DB_NAME).collection("homePageData");
 
+    app.post('/homePagesAllData', (req, res) => {
+        const homeData = req.body;
+        console.log(homeData, '[homeData]');
+        homePageData.insertMany(homeData)
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    })
+
+    // get the user-specific destination 
+    app.get("/destination:name", (req, res) => {
+        const destinationName = req.params.name;
+        const convert = destinationName.toLowerCase();
+        homePageData.find(
+            { "name": { $regex: convert } }
+        ).limit(1)
+            .toArray((err, document) => {
+                res.send(document);
+            });
+    });
 
 
-    
 });
-
-
 
 app.get("/", (req, res) => {
     res.send('Hello wold ,node working... ')
