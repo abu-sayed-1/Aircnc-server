@@ -41,12 +41,22 @@ client.connect(err => {
     app.post('/membersAndDates', (req, res) => {
         const membersAndDatesData = req.body;
         console.log(membersAndDatesData)
-        membersAndDate.insertOne(membersAndDatesData)
+        membersAndDate.insertMany(membersAndDatesData)
             .then(result => {
                 res.send(result.insertedCount > 0)
             });
 
     });
+    //#shred || get specific member & date data
+    app.get('/gustsAndDates:id', (req, res) => {
+        const uniqueId = req.params.id;
+        membersAndDate.find({ "id": uniqueId })
+            .toArray((err, document) => {
+                res.send(document);
+            })
+
+    })
+
     // #SelectRoom|| post Rooms Info 
     app.post('/roomsInfo', (req, res) => {
         const rooms = req.body;
