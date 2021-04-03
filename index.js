@@ -3,12 +3,13 @@ const express = require('express'),
 const cors = require('cors');
 const MongoClient = require('mongodb').MongoClient;
 require('dotenv').config();
+
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 const port = 4000;
-
+const stripe = require("stripe")(process.env.DB_STRIPE);
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uj2jz.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -47,7 +48,7 @@ client.connect(err => {
             });
 
     });
-    //#shred || get specific member & date data
+    //#shred || get specific member & date 
     app.get('/gustsAndDates:id', (req, res) => {
         const uniqueId = req.params.id;
         membersAndDate.find({ "id": uniqueId })
@@ -60,6 +61,7 @@ client.connect(err => {
     // #SelectRoom|| post Rooms Info 
     app.post('/roomsInfo', (req, res) => {
         const rooms = req.body;
+        console.log(rooms)
         roomsInfo.insertMany(rooms)
             .then(result => {
                 res.send(result.insertedCount > 0)
@@ -72,10 +74,44 @@ client.connect(err => {
         roomsInfo.find({ "city": room })
             .toArray((err, document) => {
                 res.send(document);
+            });
+    });
+
+    // #SelectRoom|| get Room detail
+    app.get('/roomDetail:id', (req, res) => {
+        const id = req.params.id;
+        const convert = parseFloat(id)
+        roomsInfo.find({
+            "rooms.id": convert
+        })
+            .toArray((err, document) => {
+                res.send(document)
             })
     })
 
+});
 
+// stripe payment gateWay==========================>
+app.post("/stripe/charge", cors(), async (req, res) => {
+    let { amount, id } = req.body;
+    try {
+        const payment = await stripe.paymentIntents.create({
+            amount: amount,
+            currency: "USD",
+            description: "project Name: aircnc",
+            payment_method: id,
+            confirm: true,
+        });
+        res.json({
+            confirm: "Payment Successful",
+            success: true,
+        });
+    } catch (error) {
+        res.json({
+            message: error.message,
+            success: false,
+        });
+    }
 });
 
 app.get("/", (req, res) => {
