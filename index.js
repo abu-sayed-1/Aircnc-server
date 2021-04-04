@@ -17,6 +17,7 @@ client.connect(err => {
     const homePageData = client.db(process.env.DB_NAME).collection("homePageData");
     const membersAndDate = client.db(process.env.DB_NAME).collection("membersAndDate");
     const roomsInfo = client.db(process.env.DB_NAME).collection("roomsInfo");
+    const serviceAndCountryInfo = client.db(process.env.DB_NAME).collection("serviceAndCountryInfo");
     //#home|| post home pages All data
     app.post('/homePagesAllData', (req, res) => {
         const homeData = req.body;
@@ -77,17 +78,26 @@ client.connect(err => {
             });
     });
 
-    // #SelectRoom|| get Room detail
     app.get('/roomDetail:id', (req, res) => {
         const id = req.params.id;
         const convert = parseFloat(id)
         roomsInfo.find({
-            "rooms.id": convert
+            rooms: { $elemMatch: { id: convert } }
         })
             .toArray((err, document) => {
                 res.send(document)
             })
-    })
+    });
+
+    // #RoomDetail || post service And countryInfo
+    app.post('/serviceAndCountry', (req, res) => {
+        console.log(req);
+        serviceAndCountryInfo.insertMany(req.body)
+            .then(result => {
+                res.send(result.insertedCount > 0)
+            });
+    });
+
 
 });
 
