@@ -98,6 +98,17 @@ client.connect(err => {
             });
     });
 
+    // #RoomDetail || get specific service And countryInfo
+    app.get('/specificCountryInfo:country', (req, res) => {
+        const country = req.params.country;
+        console.log(country);
+        serviceAndCountryInfo.find({
+            "country": country
+        })
+            .toArray((err, document) => {
+                res.send(document)
+            });
+    });
 
 });
 
