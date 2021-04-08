@@ -32,7 +32,7 @@ client.connect(err => {
         const destinationName = req.params.name;
         const convert = destinationName.toLowerCase();
         homePageData.find(
-            { "name": { $regex: convert } }
+            { "city": { $regex: convert } }
         ).limit(1)
             .toArray((err, document) => {
                 res.send(document);
@@ -72,6 +72,7 @@ client.connect(err => {
     // #SelectRoom|| get Room specific data
     app.get('/roomsByData:city', (req, res) => {
         const room = req.params.city;
+        console.log(room)
         roomsInfo.find({ "city": room })
             .toArray((err, document) => {
                 res.send(document);
@@ -80,9 +81,8 @@ client.connect(err => {
 
     app.get('/roomDetail:id', (req, res) => {
         const id = req.params.id;
-        const convert = parseFloat(id)
         roomsInfo.find({
-            rooms: { $elemMatch: { id: convert } }
+            rooms: { $elemMatch: { id: id } }
         })
             .toArray((err, document) => {
                 res.send(document)
@@ -99,8 +99,8 @@ client.connect(err => {
     });
 
     // #RoomDetail || get specific service And countryInfo
-    app.get('/specificCountryInfo:country', (req, res) => {
-        const country = req.params.country;
+    app.get('/specificCountryInfo:countryName', (req, res) => {
+        const country = req.params.countryName;
         console.log(country);
         serviceAndCountryInfo.find({
             "country": country
