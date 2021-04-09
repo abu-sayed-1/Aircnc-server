@@ -18,6 +18,7 @@ client.connect(err => {
     const membersAndDate = client.db(process.env.DB_NAME).collection("membersAndDate");
     const roomsInfo = client.db(process.env.DB_NAME).collection("roomsInfo");
     const serviceAndCountryInfo = client.db(process.env.DB_NAME).collection("serviceAndCountryInfo");
+    const allPlace = client.db(process.env.DB_NAME).collection("allPlace");
     //#home|| post home pages All data
     app.post('/homePagesAllData', (req, res) => {
         const homeData = req.body;
@@ -78,6 +79,21 @@ client.connect(err => {
                 res.send(document);
             });
     });
+
+    // #SelectRoom || Type of place
+    app.post('/allPlace', (req, res) => {
+        allPlace.insertMany(req.body)
+            .then(result => res.send(result.insertedCount > 0));
+    });
+
+    // #SelectRoom ||specific Type of place
+    app.get('/place:name', (req, res) => {
+        allPlace.find({ "place": req.params.name })
+            .toArray((err, document) => {
+                res.send(document);
+            });
+    });
+
 
     app.get('/roomDetail:id', (req, res) => {
         const id = req.params.id;
