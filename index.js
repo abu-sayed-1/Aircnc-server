@@ -19,6 +19,7 @@ client.connect(err => {
     const roomsInfo = client.db(process.env.DB_NAME).collection("roomsInfo");
     const serviceAndCountryInfo = client.db(process.env.DB_NAME).collection("serviceAndCountryInfo");
     const allPlace = client.db(process.env.DB_NAME).collection("allPlace");
+    const signUp = client.db(process.env.DB_NAME).collection("signUp")
     //#home|| post home pages All data
     app.post('/homePagesAllData', (req, res) => {
         const homeData = req.body;
@@ -72,8 +73,7 @@ client.connect(err => {
 
     // #SelectRoom|| get Room specific data
     app.get('/roomsByData:city', (req, res) => {
-        const room = req.params.city;
-        console.log(room)
+        const room = req.params.city.toLowerCase();
         roomsInfo.find({ "city": room })
             .toArray((err, document) => {
                 res.send(document);
@@ -125,6 +125,31 @@ client.connect(err => {
                 res.send(document)
             });
     });
+
+    // #SignUp || post SignUp data
+    app.post('/signUp', (req, res) => {
+        signUp.insertOne(req.body)
+            .then(result => {
+                res.send(result.insertedCount > 0);
+            })
+    });
+
+    // #login || verify Login Number
+    app.get('/verifyLoginNumber:number', (req, res) => {
+        console.log(req.params.number)
+        signUp.find({
+            "number": req.params.number
+        })
+            .toArray((err, document) => {
+                res.send(document)
+                // if (document) {
+                //     res.send({ login: true })
+                // }
+                // else {
+                //     res.send({ login: false })
+                // }
+            })
+    })
 
 });
 
