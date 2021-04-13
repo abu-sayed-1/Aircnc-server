@@ -136,18 +136,11 @@ client.connect(err => {
 
     // #login || verify Login Number
     app.get('/verifyLoginNumber:number', (req, res) => {
-        console.log(req.params.number)
         signUp.find({
             "number": req.params.number
         })
             .toArray((err, document) => {
                 res.send(document)
-                // if (document) {
-                //     res.send({ login: true })
-                // }
-                // else {
-                //     res.send({ login: false })
-                // }
             })
     })
 
