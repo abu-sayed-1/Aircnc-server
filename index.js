@@ -12,14 +12,15 @@ const port = 4000;
 const stripe = require("stripe")(process.env.DB_STRIPE);
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.uj2jz.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-
 client.connect(err => {
     const homePageData = client.db(process.env.DB_NAME).collection("homePageData");
     const membersAndDate = client.db(process.env.DB_NAME).collection("membersAndDate");
     const roomsInfo = client.db(process.env.DB_NAME).collection("roomsInfo");
     const serviceAndCountryInfo = client.db(process.env.DB_NAME).collection("serviceAndCountryInfo");
     const allPlace = client.db(process.env.DB_NAME).collection("allPlace");
-    const signUp = client.db(process.env.DB_NAME).collection("signUp")
+    const signUp = client.db(process.env.DB_NAME).collection("signUp");
+    const autocomplete = client.db(process.env.DB_NAME).collection("autocomplete");
+
     //#home|| post home pages All data
     app.post('/homePagesAllData', (req, res) => {
         const homeData = req.body;
@@ -142,7 +143,24 @@ client.connect(err => {
             .toArray((err, document) => {
                 res.send(document)
             })
-    })
+    });
+
+    //#search destination || autocomplete data
+    app.post('/autocompleteData', (req, res) => {
+        autocomplete.insertMany(req.body)
+            .then(result => res.send(result.insertedCount > 0));
+    });
+
+    app.get('/autocompleteChange:countryAndCity', (req, res) => {
+        const convertData = req.params.countryAndCity.toLowerCase();
+        console.log(convertData);
+        autocomplete.find({
+            "countryAndCity": { $regex: convertData }
+        })
+            .toArray((err, document) => {
+                res.send(document);
+            })
+    });
 
 });
 
