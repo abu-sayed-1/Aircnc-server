@@ -24,18 +24,19 @@ client.connect(err => {
     //#home|| post home pages All data
     app.post('/homePagesAllData', (req, res) => {
         const homeData = req.body;
+        console.log(homeData)
         homePageData.insertMany(homeData)
             .then(result => {
                 res.send(result.insertedCount > 0);
             })
-    })
+    });
 
     //#home||get the user-specific destination 
     app.get("/destination:name", (req, res) => {
         const destinationName = req.params.name;
         const convert = destinationName.toLowerCase();
         homePageData.find(
-            { "city": { $regex: convert } }
+            { "countryAndCity": { $regex: convert } }
         ).limit(1)
             .toArray((err, document) => {
                 res.send(document);
@@ -45,7 +46,7 @@ client.connect(err => {
     //#home|| post members and startAnd date
     app.post('/membersAndDates', (req, res) => {
         const membersAndDatesData = req.body;
-        console.log(membersAndDatesData)
+        // console.log(membersAndDatesData)
         membersAndDate.insertMany(membersAndDatesData)
             .then(result => {
                 res.send(result.insertedCount > 0)
@@ -65,7 +66,7 @@ client.connect(err => {
     // #SelectRoom|| post Rooms Info 
     app.post('/roomsInfo', (req, res) => {
         const rooms = req.body;
-        console.log(rooms)
+        // console.log(rooms)
         roomsInfo.insertMany(rooms)
             .then(result => {
                 res.send(result.insertedCount > 0)
@@ -108,7 +109,7 @@ client.connect(err => {
 
     // #RoomDetail || post service And countryInfo
     app.post('/serviceAndCountry', (req, res) => {
-        console.log(req);
+        // console.log(req);
         serviceAndCountryInfo.insertMany(req.body)
             .then(result => {
                 res.send(result.insertedCount > 0)
@@ -118,7 +119,7 @@ client.connect(err => {
     // #RoomDetail || get specific service And countryInfo
     app.get('/specificCountryInfo:countryName', (req, res) => {
         const country = req.params.countryName;
-        console.log(country);
+        // console.log(country);
         serviceAndCountryInfo.find({
             "country": country
         })
@@ -153,7 +154,7 @@ client.connect(err => {
 
     app.get('/autocompleteChange:countryAndCity', (req, res) => {
         const convertData = req.params.countryAndCity.toLowerCase();
-        console.log(convertData);
+        // console.log(convertData);
         autocomplete.find({
             "countryAndCity": { $regex: convertData }
         })
