@@ -20,7 +20,7 @@ client.connect(err => {
     const allPlace = client.db(process.env.DB_NAME).collection("allPlace");
     const signUp = client.db(process.env.DB_NAME).collection("signUp");
     const autocomplete = client.db(process.env.DB_NAME).collection("autocomplete");
-
+    const whoComing = client.db(process.env.DB_NAME).collection("whoComing");
     //#home|| post home pages All data
     app.post('/homePagesAllData', (req, res) => {
         const homeData = req.body;
@@ -46,7 +46,6 @@ client.connect(err => {
     //#home|| post members and startAnd date
     app.post('/membersAndDates', (req, res) => {
         const membersAndDatesData = req.body;
-        // console.log(membersAndDatesData)
         membersAndDate.insertMany(membersAndDatesData)
             .then(result => {
                 res.send(result.insertedCount > 0)
@@ -66,7 +65,6 @@ client.connect(err => {
     // #SelectRoom|| post Rooms Info 
     app.post('/roomsInfo', (req, res) => {
         const rooms = req.body;
-        // console.log(rooms)
         roomsInfo.insertMany(rooms)
             .then(result => {
                 res.send(result.insertedCount > 0)
@@ -128,8 +126,26 @@ client.connect(err => {
             });
     });
 
+    // #WhoComing || post why user coming
+    app.post('/WhyComing', (req, res) => {
+        console.log(req)
+        whoComing.insertOne(req.body)
+            .then(result => res.send(result.insertedCount > 0))
+    })
+
+    // #SignUp || verify SignUp 
+    app.get('/verifySignUp:number', (req, res) => {
+        console.log(req.params.number);
+        signUp.find({
+            "number": req.params.number
+        })
+            .toArray((err, document) => {
+                res.send(document);
+            })
+    })
     // #SignUp || post SignUp data
     app.post('/signUp', (req, res) => {
+        console.log(req)
         signUp.insertOne(req.body)
             .then(result => {
                 res.send(result.insertedCount > 0);
@@ -154,7 +170,7 @@ client.connect(err => {
 
     app.get('/autocompleteChange:countryAndCity', (req, res) => {
         const convertData = req.params.countryAndCity.toLowerCase();
-        // console.log(convertData);
+        console.log(convertData);
         autocomplete.find({
             "countryAndCity": { $regex: convertData }
         })
@@ -167,6 +183,7 @@ client.connect(err => {
 
 // stripe payment gateWay==========================>
 app.post("/stripe/charge", cors(), async (req, res) => {
+    console.log(req)
     let { amount, id } = req.body;
     try {
         const payment = await stripe.paymentIntents.create({
