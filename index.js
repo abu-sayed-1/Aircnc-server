@@ -32,45 +32,41 @@ client.connect(err => {
 
     //#home page||get the user-specific destination 
     app.get("/destination:name", (req, res) => {
-        const destinationName = req.params.name;
-        const convert = destinationName.toLowerCase();
+        const destinationName = req.params.name.toLowerCase();
         homePageData.find(
-            { "countryAndCity": { $regex: convert } }
+            { "countryAndCity": { $regex: destinationName } }
         ).limit(1)
             .toArray((err, document) => {
                 res.send(document);
             });
     });
 
-    //#home|| post members and startAnd date
+    //#home page || post members and date
     app.post('/membersAndDates', (req, res) => {
-        const membersAndDatesData = req.body;
-        membersAndDate.insertMany(membersAndDatesData)
+        membersAndDate.insertMany(req.body)
             .then(result => {
                 res.send(result.insertedCount > 0)
             });
-
     });
-    //#shred || get specific member & date 
+
+    //#shred > DivisionNavbar page || get specific member & date 
     app.get('/gustsAndDates:id', (req, res) => {
-        const uniqueId = req.params.id;
-        membersAndDate.find({ "id": uniqueId })
+        membersAndDate.find({ "id": req.params.id })
             .toArray((err, document) => {
                 res.send(document);
             })
 
     })
 
-    // #SelectRoom|| post Rooms Info 
+    // #SelectRoom page || post Rooms Info 
     app.post('/roomsInfo', (req, res) => {
-        const rooms = req.body;
-        roomsInfo.insertMany(rooms)
+        roomsInfo.insertMany(req.body)
             .then(result => {
                 res.send(result.insertedCount > 0)
             });
     });
 
-    // #SelectRoom|| get Room specific data
+    // #SelectRoom page || get Room specific data
     app.get('/roomsByData:city', (req, res) => {
         const room = req.params.city.toLowerCase();
         roomsInfo.find({ "city": room })
@@ -79,13 +75,13 @@ client.connect(err => {
             });
     });
 
-    // #SelectRoom || Type of place
+    // #SelectRoom page || Type of place
     app.post('/allPlace', (req, res) => {
         allPlace.insertMany(req.body)
             .then(result => res.send(result.insertedCount > 0));
     });
 
-    // #SelectRoom ||specific Type of place
+    // #SelectRoom page || specific Type of place
     app.get('/place:name', (req, res) => {
         allPlace.find({ "place": req.params.name })
             .toArray((err, document) => {
@@ -93,18 +89,17 @@ client.connect(err => {
             });
     });
 
-
+    //#roomDetail page || get specific room Detail
     app.get('/roomDetail:id', (req, res) => {
-        const id = req.params.id;
         roomsInfo.find({
-            rooms: { $elemMatch: { id: id } }
+            rooms: { $elemMatch: { id: req.params.id } }
         })
             .toArray((err, document) => {
                 res.send(document)
             })
     });
 
-    // #RoomDetail || post service And countryInfo
+    // #RoomDetail page || post service And countryInfo
     app.post('/serviceAndCountry', (req, res) => {
         serviceAndCountryInfo.insertMany(req.body)
             .then(result => {
@@ -112,27 +107,24 @@ client.connect(err => {
             });
     });
 
-    // #RoomDetail || get specific service And countryInfo
+    // #RoomDetail page || get specific service And countryInfo
     app.get('/specificCountryInfo:countryName', (req, res) => {
-        const country = req.params.countryName;
         serviceAndCountryInfo.find({
-            "country": country
+            "country": req.params.countryName
         })
             .toArray((err, document) => {
                 res.send(document)
             });
     });
 
-    // #WhoComing || post why user coming
+    // #WhoComing page || post why user coming
     app.post('/WhyComing', (req, res) => {
-        console.log(req)
         whoComing.insertOne(req.body)
             .then(result => res.send(result.insertedCount > 0))
     })
 
-    // #SignUp || verify SignUp 
+    // #SignUp page || verify SignUp 
     app.get('/verifySignUp:number', (req, res) => {
-        console.log(req.params.number);
         signUp.find({
             "number": req.params.number
         })
@@ -140,7 +132,8 @@ client.connect(err => {
                 res.send(document);
             })
     })
-    // #SignUp || post SignUp data
+
+    // #SignUp page || post SignUp data
     app.post('/signUp', (req, res) => {
         signUp.insertOne(req.body)
             .then(result => {
@@ -148,7 +141,7 @@ client.connect(err => {
             });
     });
 
-    // #login || verify Login Number
+    // #login page || verify Login Number
     app.get('/verifyLoginNumber:number', (req, res) => {
         signUp.find({
             "number": req.params.number
@@ -158,27 +151,26 @@ client.connect(err => {
             })
     });
 
-    //#search destination || autocomplete data
+    //#SearchDestination page || post autocomplete data
     app.post('/autocompleteData', (req, res) => {
         autocomplete.insertMany(req.body)
             .then(result => res.send(result.insertedCount > 0));
     });
 
-    app.get('/autocompleteChange:countryAndCity', (req, res) => {
+    //#SearchDestination page || get autocomplete info
+    app.get('/autocomplete/info:countryAndCity', (req, res) => {
         const convertData = req.params.countryAndCity.toLowerCase();
         autocomplete.find({
             "countryAndCity": { $regex: convertData }
         })
             .toArray((err, document) => {
                 res.send(document);
-            })
+            });
     });
-
 });
 
 // stripe payment gateWay==========================>
 app.post("/stripe/charge", cors(), async (req, res) => {
-    console.log(req)
     let { amount, id } = req.body;
     try {
         const payment = await stripe.paymentIntents.create({
