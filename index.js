@@ -21,17 +21,16 @@ client.connect(err => {
     const signUp = client.db(process.env.DB_NAME).collection("signUp");
     const autocomplete = client.db(process.env.DB_NAME).collection("autocomplete");
     const whoComing = client.db(process.env.DB_NAME).collection("whoComing");
-    //#home|| post home pages All data
+
+    //#home page || post home pages All data
     app.post('/homePagesAllData', (req, res) => {
-        const homeData = req.body;
-        console.log(homeData)
-        homePageData.insertMany(homeData)
+        homePageData.insertMany(req.body)
             .then(result => {
                 res.send(result.insertedCount > 0);
             })
     });
 
-    //#home||get the user-specific destination 
+    //#home page||get the user-specific destination 
     app.get("/destination:name", (req, res) => {
         const destinationName = req.params.name;
         const convert = destinationName.toLowerCase();
@@ -107,7 +106,6 @@ client.connect(err => {
 
     // #RoomDetail || post service And countryInfo
     app.post('/serviceAndCountry', (req, res) => {
-        // console.log(req);
         serviceAndCountryInfo.insertMany(req.body)
             .then(result => {
                 res.send(result.insertedCount > 0)
@@ -117,7 +115,6 @@ client.connect(err => {
     // #RoomDetail || get specific service And countryInfo
     app.get('/specificCountryInfo:countryName', (req, res) => {
         const country = req.params.countryName;
-        // console.log(country);
         serviceAndCountryInfo.find({
             "country": country
         })
@@ -145,11 +142,10 @@ client.connect(err => {
     })
     // #SignUp || post SignUp data
     app.post('/signUp', (req, res) => {
-        console.log(req)
         signUp.insertOne(req.body)
             .then(result => {
                 res.send(result.insertedCount > 0);
-            })
+            });
     });
 
     // #login || verify Login Number
@@ -170,7 +166,6 @@ client.connect(err => {
 
     app.get('/autocompleteChange:countryAndCity', (req, res) => {
         const convertData = req.params.countryAndCity.toLowerCase();
-        console.log(convertData);
         autocomplete.find({
             "countryAndCity": { $regex: convertData }
         })
