@@ -1,6 +1,7 @@
 const express = require('express'),
     bodyParser = require('body-parser');
 const cors = require('cors');
+const axios = require('axios');
 const MongoClient = require('mongodb').MongoClient;
 require('dotenv').config();
 
@@ -169,7 +170,26 @@ client.connect(err => {
     });
 });
 
-// stripe payment gateWay==========================>
+//#SignUp page || signUp With google ReCaptcha
+app.post("/signUpWith/ReCaptcha", async (req, res) => {
+    if (!req.body.token) {
+        return res.status(400).json({ error: "reCaptcha token is missing" });
+    };
+    try {
+        const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=6Lf2IcwaAAAAAGwKe2LrxTe7lTn6DOhAKnPQ7Z_w&response=${req.body.token}`;
+        const response = await axios.post(googleVerifyUrl);
+        const { success } = response.data;
+        if (success) {
+            return res.json({ success: true })
+        } else {
+            return res.status(400).json({ error: "Invalid captcha. Try again" });
+        }
+    } catch (e) {
+        return res.status(400).json({ error: "reCaptcha error." });
+    }
+})
+
+// #paymentGateWays > stripe page || stripe payment gateWay==========================>
 app.post("/stripe/charge", cors(), async (req, res) => {
     let { amount, id } = req.body;
     try {
