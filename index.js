@@ -176,7 +176,7 @@ app.post("/signUpWith/ReCaptcha", async (req, res) => {
         return res.status(400).json({ error: "reCaptcha token is missing" });
     };
     try {
-        const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=6Lf2IcwaAAAAAGwKe2LrxTe7lTn6DOhAKnPQ7Z_w&response=${req.body.token}`;
+        const googleVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${process.env.reCaptcha_SECRETKey}&response=${req.body.token}`;
         const response = await axios.post(googleVerifyUrl);
         const { success } = response.data;
         if (success) {
@@ -211,9 +211,7 @@ app.post("/stripe/charge", cors(), async (req, res) => {
         });
     }
 });
-
 app.get("/", (req, res) => {
     res.send('Hello wold ,node working... ')
 })
-
-app.listen(port);
+app.listen(process.env.PORT || port);
